@@ -19,12 +19,12 @@ export default function Home() {
   }, [supabase]);
 
   const handleLogin = async () => {
-  console.log("Login clicked - redirecting to:", window.location.origin);
+    const redirectUrl = "https://repurposr-r8j4b9ity-222dreamlap-9348s-projects.vercel.app";
   
   await supabase.auth.signInWithOAuth({ 
     provider: 'google',
     options: { 
-      redirectTo: "https://repurposr-r8j4b9ity-222dreamlap-9348s-projects.vercel.app"   // Hardcoded live URL
+        redirectTo: redirectUrl 
       }
     });
   };
