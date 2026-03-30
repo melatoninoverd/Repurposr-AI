@@ -19,12 +19,14 @@ export default function Home() {
   }, [supabase]);
 
   const handleLogin = async () => {
-    const redirectUrl = "https://repurposr-r8j4b9ity-222dreamlap-9348s-projects.vercel.app";
+    const liveUrl = "https://repurposr-ai.vercel.app";
   
-  await supabase.auth.signInWithOAuth({ 
-    provider: 'google',
-    options: { 
-        redirectTo: redirectUrl 
+    console.log("🔥 Login clicked - redirecting to:", liveUrl);
+  
+    await supabase.auth.signInWithOAuth({ 
+      provider: 'google',
+      options: { 
+      redirectTo: liveUrl 
       }
     });
   };
