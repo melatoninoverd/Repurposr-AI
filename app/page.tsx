@@ -1,50 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { createClient } from './lib/supabase';
+import { useState } from 'react';
 
 export default function Home() {
   const [input, setInput] = useState('');
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [error, setError] = useState('');
-
-  const [supabase] = useState(() => createClient());
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-  }, [supabase]);
-
-  const handleLogin = async () => {
-    const currentUrl = window.location.origin;
-  
-    await supabase.auth.signInWithOAuth({ 
-      provider: 'google',
-      options: { 
-        redirectTo: `${currentUrl}/auth/callback` 
-      }
-    });
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-  };
+  const [freeUsesLeft, setFreeUsesLeft] = useState(3);
 
   const handleRepurpose = async () => {
-    setError('');
-    if (!user) {
-      alert("Please log in with Google first!");
+    if (freeUsesLeft <= 0) {
+      alert("You've used all your free tries! Upgrade to Pro for unlimited uses ($19/month) 🔥");
       return;
     }
-    if (input.trim().length < 30) {
-      setError("Please paste at least 30 characters of content.");
-      return;
-    }
-    
+
     setLoading(true);
     
     const res = await fetch('/api/repurpose', {
@@ -54,24 +23,15 @@ export default function Home() {
     });
     
     const data = await res.json();
-    
-    if (data.error) {
-      setError(data.error);
-    } else {
-      setResults(data);
-    }
-    
+    setResults(data);
+    setFreeUsesLeft(prev => prev - 1);
     setLoading(false);
   };
 
   const handleUpgrade = async () => {
     const res = await fetch('/api/create-checkout', { method: 'POST' });
-    const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert("Payment link failed. Try again.");
-    }
+    const { url } = await res.json();
+    if (url) window.location.href = url;
   };
 
   const cleanVersions = (raw: string) => {
@@ -79,10 +39,8 @@ export default function Home() {
       let jsonStr = raw.trim();
       if (jsonStr.includes("```json")) jsonStr = jsonStr.split("```json")[1].split("```")[0];
       else if (jsonStr.includes("```")) jsonStr = jsonStr.split("```")[1].split("```")[0];
-      
       const firstBrace = jsonStr.indexOf('{');
       if (firstBrace > 0) jsonStr = jsonStr.substring(firstBrace);
-      
       return JSON.parse(jsonStr);
     } catch (e) {
       return null;
@@ -100,23 +58,25 @@ export default function Home() {
             <h1 className="text-3xl font-semibold tracking-tight">Repurposr</h1>
           </div>
           
-          {user && (
-            <button 
-              onClick={handleUpgrade}
-              className="bg-white text-black px-6 py-2.5 rounded-2xl font-semibold hover:bg-amber-300 transition"
-            >
-              Upgrade to Pro — $19/mo
-            </button>
-          )}
+          <button 
+            onClick={handleUpgrade}
+            className="bg-white text-black px-6 py-2.5 rounded-2xl font-semibold hover:bg-amber-300 transition"
+          >
+            Upgrade to Pro — $19/mo
+          </button>
         </div>
       </nav>
 
       <div className="max-w-5xl mx-auto px-8 pt-16 pb-24">
-        <div className="max-w-2xl mx-auto text-center mb-16">
+        <div className="max-w-2xl mx-auto text-center mb-12">
           <h2 className="text-6xl font-bold tracking-tighter mb-6">
             One post.<br />Everywhere.
           </h2>
           <p className="text-2xl text-zinc-400">Paste once. Get perfectly optimized versions for every platform.</p>
+          
+          <div className="mt-6 inline-block bg-amber-500/10 text-amber-400 px-6 py-2 rounded-2xl text-sm font-medium">
+            {freeUsesLeft} free uses left • Upgrade for unlimited
+          </div>
         </div>
 
         <textarea
@@ -133,10 +93,6 @@ export default function Home() {
         >
           {loading ? "Repurposing across platforms..." : "Repurpose My Content"}
         </button>
-
-        {error && (
-          <div className="mt-6 text-red-500 text-center font-medium">{error}</div>
-        )}
 
         {results && (
           <div className="mt-20">
@@ -158,4 +114,3 @@ export default function Home() {
       </div>
     </div>
   );
-}
