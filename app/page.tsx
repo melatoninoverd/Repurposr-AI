@@ -27,13 +27,10 @@ export default function Home() {
   const handleLogin = async () => {
     setLoadingLogin(true);
     const redirectUrl = `${window.location.origin}/auth/callback`;
-    
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: redirectUrl }
     });
-    
-    // The page will redirect, so we don't need to set loading false
   };
 
   const handleLogout = async () => {
@@ -43,11 +40,11 @@ export default function Home() {
 
   const handleRepurpose = async () => {
     if (!user) {
-      alert("Please log in to continue");
+      alert("Please sign in to use Repurposr");
       return;
     }
     if (freeUsesLeft <= 0) {
-      alert("No free uses left. Upgrade to Pro for unlimited access.");
+      alert("You've used all free tries. Upgrade to Pro for unlimited access ($19/mo)");
       return;
     }
 
@@ -106,7 +103,12 @@ export default function Home() {
             {user ? (
               <>
                 <span className="text-zinc-400 text-sm">hi {user.email?.split('@')[0]}</span>
-                <button onClick={handleLogout} className="text-sm text-zinc-400 hover:text-white cursor-pointer">log out</button>
+                <button 
+                  onClick={handleLogout} 
+                  className="text-sm text-zinc-400 hover:text-white cursor-pointer transition"
+                >
+                  log out
+                </button>
               </>
             ) : (
               <button 
