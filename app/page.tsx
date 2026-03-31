@@ -12,7 +12,6 @@ export default function Home() {
 
   const [supabase] = useState(() => createClient());
 
-  // Listen for login state
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
 
@@ -38,11 +37,11 @@ export default function Home() {
 
   const handleRepurpose = async () => {
     if (!user) {
-      alert("Please log in first to use the tool 🔥");
+      alert("Please log in to continue");
       return;
     }
     if (freeUsesLeft <= 0) {
-      alert("You've used all free tries! Upgrade to Pro for unlimited ($19/mo)");
+      alert("No free uses left. Upgrade to Pro for unlimited access.");
       return;
     }
 
@@ -81,64 +80,64 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
-      {/* Fancy Navbar */}
-      <nav className="border-b border-zinc-800 bg-zinc-950/90 backdrop-blur-md sticky top-0 z-50">
+      <nav className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-8 py-6 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-2xl">🔄</div>
-            <h1 className="text-3xl font-bold tracking-tighter">Repurposr</h1>
+            <div className="text-3xl font-light tracking-tighter">repurposr</div>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-8">
             {user ? (
               <>
-                <span className="text-zinc-400 text-sm">Hi, {user.email?.split('@')[0]}</span>
-                <button onClick={handleLogout} className="text-zinc-400 hover:text-white text-sm">Log out</button>
+                <span className="text-zinc-400 text-sm">hi {user.email?.split('@')[0]}</span>
+                <button onClick={handleLogout} className="text-sm text-zinc-400 hover:text-white">log out</button>
               </>
             ) : (
               <button 
                 onClick={handleLogin}
-                className="bg-white text-black px-8 py-3 rounded-2xl font-semibold hover:bg-zinc-100 transition"
+                className="text-sm font-medium px-6 py-3 rounded-2xl border border-zinc-700 hover:bg-white hover:text-black transition"
               >
-                Sign in with Google
+                sign in with google
               </button>
             )}
 
             <button 
               onClick={handleUpgrade}
-              className="bg-gradient-to-r from-amber-400 to-yellow-400 text-black px-8 py-3 rounded-2xl font-semibold hover:scale-105 transition"
+              className="bg-white text-black px-8 py-3 rounded-2xl font-medium hover:bg-zinc-100 transition"
             >
-              Upgrade to Pro — $19/mo
+              upgrade • $19/mo
             </button>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-8 pt-20 pb-32">
-        <div className="text-center max-w-2xl mx-auto">
-          <h2 className="text-7xl font-bold tracking-tighter leading-none mb-6">
-            One post.<br />Everywhere.
-          </h2>
-          <p className="text-3xl text-zinc-400 mb-8">
-            Paste once. Get perfectly optimized versions for X, LinkedIn, TikTok, Instagram, YouTube & more.
+      <div className="max-w-4xl mx-auto px-8 pt-24 pb-32">
+        <div className="text-center mb-20">
+          <h1 className="text-7xl font-light tracking-tighter leading-none mb-4">
+            one post.<br />everywhere.
+          </h1>
+          <p className="text-2xl text-zinc-400 max-w-md mx-auto">
+            paste once. get clean versions for every platform.
           </p>
-
-          {user && (
-            <div className="inline-flex items-center gap-3 bg-zinc-900 border border-zinc-700 rounded-3xl px-8 py-4 mb-12">
-              <div className="text-amber-400 font-medium">Free uses left:</div>
-              <div className="flex gap-1">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className={`w-6 h-6 rounded-2xl ${i < freeUsesLeft ? 'bg-amber-400' : 'bg-zinc-700'}`} />
-                ))}
-              </div>
-              <span className="font-semibold text-amber-400">{freeUsesLeft}/3</span>
-            </div>
-          )}
         </div>
 
+        {user && (
+          <div className="flex justify-center mb-12">
+            <div className="bg-zinc-900 border border-zinc-700 rounded-3xl px-8 py-4 flex items-center gap-4">
+              <span className="text-zinc-400 text-sm">free uses left</span>
+              <div className="flex gap-2">
+                {[1,2,3].map(i => (
+                  <div key={i} className={`w-5 h-5 rounded-2xl ${i <= freeUsesLeft ? 'bg-white' : 'bg-zinc-700'}`} />
+                ))}
+              </div>
+              <span className="font-medium text-white">{freeUsesLeft}/3</span>
+            </div>
+          </div>
+        )}
+
         <textarea
-          className="w-full h-80 bg-zinc-900 border border-zinc-700 rounded-3xl p-8 text-lg placeholder-zinc-400 focus:outline-none focus:border-purple-500 transition resize-none"
-          placeholder="Paste your blog, transcript, podcast notes, or idea here..."
+          className="w-full h-80 bg-zinc-900 border border-zinc-700 rounded-3xl p-8 text-lg placeholder-zinc-400 focus:outline-none focus:border-zinc-400 transition"
+          placeholder="paste your content here..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
@@ -146,19 +145,20 @@ export default function Home() {
         <button 
           onClick={handleRepurpose}
           disabled={loading || !input.trim()}
-          className="mt-8 w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-7 text-2xl font-semibold rounded-3xl hover:scale-[1.02] transition disabled:opacity-50"
+          className="mt-8 w-full py-7 text-2xl font-medium rounded-3xl border border-zinc-700 hover:border-white transition group relative overflow-hidden"
         >
-          {loading ? "Working magic across platforms ✨" : "Repurpose My Content"}
+          <span className="relative z-10">repurpose my content</span>
+          <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition"></div>
         </button>
 
         {results && (
           <div className="mt-24">
-            <h3 className="text-4xl font-bold mb-12 text-center">Here’s your fresh content 🔥</h3>
+            <h3 className="text-4xl font-light tracking-tighter mb-12 text-center">your versions</h3>
             <div className="space-y-12">
               {versions && typeof versions === 'object' ? (
                 Object.entries(versions).map(([platform, content]) => (
                   <div key={platform} className="bg-zinc-900 border border-zinc-700 rounded-3xl p-10">
-                    <h4 className="uppercase text-xs tracking-[1px] text-zinc-400 mb-6">{platform}</h4>
+                    <h4 className="uppercase text-xs tracking-widest text-zinc-400 mb-6">{platform}</h4>
                     <div className="whitespace-pre-wrap text-zinc-200 leading-relaxed text-[15.5px]">
                       {String(content)}
                     </div>
