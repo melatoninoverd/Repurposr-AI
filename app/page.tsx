@@ -29,9 +29,23 @@ export default function Home() {
   };
 
   const handleUpgrade = async () => {
-    const res = await fetch('/api/create-checkout', { method: 'POST' });
-    const { url } = await res.json();
-    if (url) window.location.href = url;
+    try {
+        const res = await fetch('/api/create-checkout', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+    
+      const data = await res.json();
+    
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Checkout failed. Try again or check console (F12)");
+      }
+    } catch (err) {
+      alert("Something went wrong. Try again.");
+      console.error(err);
+    }
   };
 
   const cleanVersions = (raw: string) => {
