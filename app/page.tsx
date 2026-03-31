@@ -7,6 +7,8 @@ export default function Home() {
   const [input, setInput] = useState('');
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingLogin, setLoadingLogin] = useState(false);
+  const [loadingUpgrade, setLoadingUpgrade] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [freeUsesLeft, setFreeUsesLeft] = useState(3);
 
@@ -23,11 +25,15 @@ export default function Home() {
   }, [supabase]);
 
   const handleLogin = async () => {
+    setLoadingLogin(true);
     const redirectUrl = `${window.location.origin}/auth/callback`;
+    
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: redirectUrl }
     });
+    
+    // The page will redirect, so we don't need to set loading false
   };
 
   const handleLogout = async () => {
@@ -58,9 +64,19 @@ export default function Home() {
   };
 
   const handleUpgrade = async () => {
-    const res = await fetch('/api/create-checkout', { method: 'POST' });
-    const { url } = await res.json();
-    if (url) window.location.href = url;
+    setLoadingUpgrade(true);
+    try {
+      const res = await fetch('/api/create-checkout', { method: 'POST' });
+      const { url } = await res.json();
+      if (url) {
+        window.location.href = url;
+      } else {
+        alert("Checkout failed. Try again.");
+      }
+    } catch (err) {
+      alert("Something went wrong. Try again.");
+    }
+    setLoadingUpgrade(false);
   };
 
   const cleanVersions = (raw: string) => {
@@ -90,22 +106,24 @@ export default function Home() {
             {user ? (
               <>
                 <span className="text-zinc-400 text-sm">hi {user.email?.split('@')[0]}</span>
-                <button onClick={handleLogout} className="text-sm text-zinc-400 hover:text-white">log out</button>
+                <button onClick={handleLogout} className="text-sm text-zinc-400 hover:text-white cursor-pointer">log out</button>
               </>
             ) : (
               <button 
                 onClick={handleLogin}
-                className="text-sm font-medium px-6 py-3 rounded-2xl border border-zinc-700 hover:bg-white hover:text-black transition"
+                disabled={loadingLogin}
+                className="text-sm font-medium px-6 py-3 rounded-2xl border border-zinc-700 hover:bg-white hover:text-black transition cursor-pointer disabled:opacity-50"
               >
-                sign in with google
+                {loadingLogin ? "signing in..." : "sign in with google"}
               </button>
             )}
 
             <button 
               onClick={handleUpgrade}
-              className="bg-white text-black px-8 py-3 rounded-2xl font-medium hover:bg-zinc-100 transition"
+              disabled={loadingUpgrade}
+              className="bg-white text-black px-8 py-3 rounded-2xl font-medium hover:bg-zinc-100 transition cursor-pointer disabled:opacity-50"
             >
-              upgrade • $19/mo
+              {loadingUpgrade ? "redirecting..." : "upgrade • $19/mo"}
             </button>
           </div>
         </div>
@@ -136,7 +154,7 @@ export default function Home() {
         )}
 
         <textarea
-          className="w-full h-80 bg-zinc-900 border border-zinc-700 rounded-3xl p-8 text-lg placeholder-zinc-400 focus:outline-none focus:border-zinc-400 transition"
+          className="w-full h-80 bg-zinc-900 border border-zinc-700 rounded-3xl p-8 text-lg placeholder-zinc-400 focus:outline-none focus:border-zinc-400 transition resize-none"
           placeholder="paste your content here..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -145,7 +163,7 @@ export default function Home() {
         <button 
           onClick={handleRepurpose}
           disabled={loading || !input.trim()}
-          className="mt-8 w-full py-7 text-2xl font-medium rounded-3xl border border-zinc-700 hover:border-white transition group relative overflow-hidden"
+          className="mt-8 w-full py-7 text-2xl font-medium rounded-3xl border border-zinc-700 hover:border-white transition group relative overflow-hidden cursor-pointer"
         >
           <span className="relative z-10">repurpose my content</span>
           <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition"></div>
