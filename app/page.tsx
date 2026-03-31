@@ -189,6 +189,13 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* Copyright Footer */}
+      <footer className="border-t border-zinc-800 py-8">
+        <div className="max-w-6xl mx-auto px-8 text-center text-xs text-zinc-500">
+          © 2026 Repurposr. All rights reserved.
+        </div>
+      </footer>
     </div>
   );
 }
